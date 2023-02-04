@@ -9,7 +9,7 @@ def open_a_token(file_name):
     with open(os.path.join(os.getcwd(), file_name)) as f:
         res = json.load(f)
         vk_token = res['VK']['token']
-        vk_id = res['VK']['id']
+        vk_id = res['VK']['page_id']
         ya_token = res['Yandex']['token']
     return [vk_token, vk_id, ya_token]        
       
@@ -27,15 +27,50 @@ class vkontakte:
         self.token = token[0]
         self.id = token[1]
         self.version = version
-        self.initial_params = {'token': self.token, 'v': self.version}
-        self.json, self.export_dict = self._sort_info()
+        self.initial_params = {'access_token': self.token, 'v': self.version}
+        self.json = self.get_information_about_the_photo()
+        # self.json, self.export_dict = self._sort_info()
 
-    def _get_photo_info(self):
+    def get_information_about_the_photo(self):
         url = 'https://api.vk.com/method/photos.get'
         params = {'owner_id': self.id,
                   'album_id': 'profile',
                   'photo_sizes': 1,
                   'extended': 1}
-        photo_info = requests.get(url, params={**self.initial_params, **params}).json()['response']
-        return photo_info['count'], photo_info['items']
+        response = requests.get(url, params={**self.initial_params, **params}).json()
+        return response['response']['count'] #response['response']['items']
 
+    
+
+# id = "13162384"
+# token = ''
+# params = {'access_token': token,
+#           'owner_id': id,
+#           'album_id': 'profile',
+#           'photo_sizes': 1,
+#           'extended': 1,
+#           'v': 5.131
+#           }
+# url = 'https://api.vk.com/method/photos.get'
+# response = requests.get(url=url, params=params).json()
+# pprint(response)
+# print(response['response']['count'], response['response']['items'])
+
+if __name__ == '__main__':
+    res = vkontakte(open_a_token('token.ini'))
+    pprint(res.json)
+
+# self.json = self.get_information_about_the_photo()
+
+# #     def get_information_about_the_photo(self):
+# #         url = 'https://api.vk.com/method/photos.get'
+# #         params = {'owner_id': self.id,
+# #                   'album_id': 'profile',
+# #                   'photo_sizes': 1,
+# #                   'extended': 1}
+# #         response = requests.get(url, params={'access_token': self.oken,
+# #                                              'owner_id': selfid,
+# #                                              'album_id': 'profile',
+# #                                              'photo_sizes': 1,
+# #                                              'extended': 1,
+# #                                              'v': 5.131}).json()
