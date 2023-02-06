@@ -105,9 +105,9 @@ class YandexDisk:
         counter = 0
         files_in_folder = self.get_information_about_folder(self.folder)
         print(f'Количество файлов для загрузки: {len(data_collection)}.')
-        for key, i in zip(data_collection.keys(), tqdm(range(self.number_of_photos - 1))):
+        for key, i in zip(data_collection.keys(), tqdm(range(self.number_of_photos))):
             time.sleep(0.25)
-            if counter < self.number_of_photos:
+            if counter <= self.number_of_photos:
                 if key not in files_in_folder:
                     params = {
                         'path': f'{self.folder}/{key}',
@@ -118,14 +118,14 @@ class YandexDisk:
                     print(f'\nФайл {key} успешно загружен.')
                     counter += 1
                 else:
-                    print(f'\nФайл {key} уже соществует.')
+                    print(f'\nФайл {key} уже существует.')
             else:
                 break   
         print(f'Загрузка завершена. Файлов загружено: {counter}.')
 
 if __name__ == '__main__':
     res_VK = Vkontakte(open_a_token('token.ini'))
-    res_YA = YandexDisk('1АААААА', open_a_token('token.ini'), res_VK.number_photos + 1)
+    res_YA = YandexDisk('1АААААА', open_a_token('token.ini'), res_VK.number_photos)
     res_YA.send_to_disk(res_VK.export_dict)
     with open('Список загружаемых файлов', 'w') as outfile:
         json.dump(res_VK.json, outfile)
