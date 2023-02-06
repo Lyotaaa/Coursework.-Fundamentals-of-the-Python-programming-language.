@@ -66,7 +66,8 @@ class Vkontakte:
                 json_file.append({"file_name": file_name, "size": photo_size})
             elif file_name in data_collection:
                 data_collection[f'{photo_elements[i]["likes"]["count"]}_{date}.jpeg'] = photo_address
-                json_file.append({"file_name": f'{photo_elements[i]["likes"]["count"]}_{date}.jpeg', "size": photo_size})
+                json_file.append(({"file_name": f'{photo_elements[i]["likes"]["count"]}_{date}.jpeg',
+                                   "size": photo_size}))
         return json_file, data_collection, number_photos
 
 class YandexDisk:
@@ -124,7 +125,7 @@ class YandexDisk:
 
 if __name__ == '__main__':
     res_VK = Vkontakte(open_a_token('token.ini'))
-    res_YA = YandexDisk('АААААА', open_a_token('token.ini'), res_VK.number_photos + 1)
+    res_YA = YandexDisk('1АААААА', open_a_token('token.ini'), res_VK.number_photos + 1)
     res_YA.send_to_disk(res_VK.export_dict)
     with open('Список загружаемых файлов', 'w') as outfile:
         json.dump(res_VK.json, outfile)
