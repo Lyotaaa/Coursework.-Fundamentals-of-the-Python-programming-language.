@@ -33,11 +33,12 @@ class Vkontakte:
 
     def get_information_about_the_photo(self):
         '''Получение информации о фотографиях'''
-        params = {'owner_id': self.id,
-                  'album_id': 'profile',
-                  'photo_sizes': 1,
-                  'extended': 1
-                  }
+        params = {
+            'owner_id': self.id,
+            'album_id': 'profile',
+            'photo_sizes': 1,
+            'extended': 1
+        }
         response = requests.get(url=self.url, params={**self.initial_params, **params})
         return response.json()['response']['count'], response.json()['response']['items']
 
@@ -58,8 +59,7 @@ class Vkontakte:
         number_photos, photo_elements = self.get_information_about_the_photo()
         for i in range(number_photos):
             photo_address, photo_size = self.find_max_resolution(photo_elements[i]['sizes'])
-            file_name = f'{photo_elements[i]["likes"]["count"]}.jpeg'#_{time_convert(photo_elements[i]["date"])}.jpeg'
-            # json_file.append({"file_name": file_name, "size": photo_size})
+            file_name = f'{photo_elements[i]["likes"]["count"]}.jpeg'
             date = f'{time_convert(photo_elements[i]["date"])}'
             if file_name not in data_collection:
                 data_collection[file_name] = photo_address
@@ -128,4 +128,3 @@ if __name__ == '__main__':
     res_YA.send_to_disk(res_VK.export_dict)
     with open('Список загружаемых файлов', 'w') as outfile:
         json.dump(res_VK.json, outfile)
-        
