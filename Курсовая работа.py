@@ -128,3 +128,4 @@ if __name__ == '__main__':
     res_YA.send_to_disk(res_VK.export_dict)
     with open('Список загружаемых файлов', 'w') as outfile:
         json.dump(res_VK.json, outfile)
+        
