@@ -106,7 +106,7 @@ class YandexDisk:
         files_in_folder = self.get_information_about_folder(self.folder)
         print(f'Количество файлов для загрузки: {len(data_collection)}.')
         for key, i in zip(data_collection.keys(), tqdm(range(self.number_of_photos))):
-            time.sleep(0.25)
+            time.sleep(0.75)
             if counter <= self.number_of_photos:
                 if key not in files_in_folder:
                     params = {
