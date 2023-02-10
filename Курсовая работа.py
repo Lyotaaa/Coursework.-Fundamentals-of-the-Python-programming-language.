@@ -5,16 +5,16 @@ import json
 import time
 from tqdm import tqdm
 from pprint import pprint
+from configparser import ConfigParser
 
 def open_a_token(file_name):
-    '''Получение token и id из файла(json)'''
-    with open(os.path.join(os.getcwd(), file_name)) as f:
-        res = json.load(f)
-        vk_token = res['VK']['token']
-        vk_id = res['VK']['page_id']
-        ya_token = res['Yandex']['token']
-    return [vk_token, vk_id, ya_token]        
-      
+    cofing = ConfigParser()
+    cofing.read(file_name)
+    vk_token = cofing['token_info']['VK_token']
+    vk_id = cofing['token_info']['page_id']
+    ya_token = cofing['token_info']['Yandex_token']
+    return [vk_token, vk_id, ya_token]
+          
 def time_convert(unix):
     time_unix = datetime.datetime.fromtimestamp(unix)
     normal_time = time_unix.strftime('time-%H.%M.%S date-%d.%m.%Y')
@@ -123,3 +123,4 @@ if __name__ == '__main__':
     res_YA.send_to_disk(res_VK.export_dict)
     with open('List of downloadable files.json', 'w') as outfile:
         json.dump(res_VK.json, outfile)
+    
