@@ -118,8 +118,8 @@ class YandexDisk:
         print(f'Загрузка завершена. Файлов загружено: {counter}.')
 
 if __name__ == '__main__':
-    res_VK = Vkontakte(open_a_token('token.ini'))
-    res_YA = YandexDisk('1АААААА', open_a_token('token.ini'), input('Введите кол-во фотографий, которые хотите загрузить: '))
+    res_VK = Vkontakte(open_a_token('confing.ini'))
+    res_YA = YandexDisk('1АААААА', open_a_token('confing.ini'), input('Введите кол-во фотографий, которые хотите загрузить: '))
     res_YA.send_to_disk(res_VK.export_dict)
     with open('List of downloadable files.json', 'w') as outfile:
         json.dump(res_VK.json, outfile)
