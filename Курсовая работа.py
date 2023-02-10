@@ -16,13 +16,12 @@ def open_a_token(file_name):
     return [vk_token, vk_id, ya_token]        
       
 def time_convert(unix):
-    '''Конвертация времени'''
     time_unix = datetime.datetime.fromtimestamp(unix)
     normal_time = time_unix.strftime('time-%H.%M.%S date-%d.%m.%Y')
     return normal_time
 
 class Vkontakte:
-    '''Создание класса'''
+    
     def __init__(self, token, version='5.131'):
         self.token = token[0]
         self.id = token[1]
@@ -32,7 +31,6 @@ class Vkontakte:
         self.json, self.export_dict, self.number_photos = self.photo_data_collection()
 
     def get_information_about_the_photo(self):
-        '''Получение информации о фотографиях'''
         params = {
             'owner_id': self.id,
             'album_id': 'profile',
@@ -43,7 +41,6 @@ class Vkontakte:
         return response.json()['response']['count'], response.json()['response']['items']
 
     def find_max_resolution(self, photo_information):
-        '''Нахождение максимального разрешения фотографи'''
         max_resolution = 0
         for i in range(len(photo_information)):
             result = photo_information[i].get('width') * photo_information[i].get('height')
@@ -53,7 +50,6 @@ class Vkontakte:
         return photo_information[max_photo].get('url'), photo_information[max_photo].get('type')
     
     def photo_data_collection(self):
-        '''Получение словаря для загрузки фотографий и файла json'''
         data_collection = {}
         json_file = []
         number_photos, photo_elements = self.get_information_about_the_photo()
@@ -71,17 +67,16 @@ class Vkontakte:
         return json_file, data_collection, number_photos
 
 class YandexDisk:
-    '''Создание класса'''
+    
     def __init__(self, folder_name, token, number):
         self.token = token[2]
-        self.number_of_photos = number
+        self.number_of_photos = int(number)
         self.url_upload = "https://cloud-api.yandex.net/v1/disk/resources/upload"
         self.url_resources = "https://cloud-api.yandex.net/v1/disk/resources"
         self.headers = {'Authorization': self.token}
         self.folder = self.create_a_folder(folder_name)
                     
     def create_a_folder(self, folder_name):
-        '''Создание папки на Яндекс Диск'''
         params = {'path': folder_name}
         if requests.get(url=self.url_resources, headers=self.headers, params=params).status_code != 200:
             requests.put(url=self.url_resources, headers=self.headers, params=params)
@@ -91,7 +86,6 @@ class YandexDisk:
         return folder_name
 
     def get_information_about_folder(self, folder_name):
-        '''Получение ссылок для загрузки'''
         params = {'path': folder_name}
         response = requests.get(url=self.url_resources, headers=self.headers, params=params)
         response = response.json()['_embedded']['items']
@@ -101,11 +95,11 @@ class YandexDisk:
         return name_files
     
     def send_to_disk(self, data_collection):
-        '''Загрузка фотографий на Яндекс Диск'''
         counter = 0
         files_in_folder = self.get_information_about_folder(self.folder)
         print(f'Количество файлов для загрузки: {len(data_collection)}.')
-        for key, i in zip(data_collection.keys(), tqdm(range(self.number_of_photos))):
+        for key in tqdm(data_collection.keys()):
+        # for key, i in zip(data_collection.keys(), tqdm(range(self.number_of_photos))):
             time.sleep(0.75)
             if counter <= self.number_of_photos:
                 if key not in files_in_folder:
@@ -125,7 +119,7 @@ class YandexDisk:
 
 if __name__ == '__main__':
     res_VK = Vkontakte(open_a_token('token.ini'))
-    res_YA = YandexDisk('1АААААА', open_a_token('token.ini'), res_VK.number_photos)
+    res_YA = YandexDisk('1АААААА', open_a_token('token.ini'), input('Введите кол-во фотографий, которые хотите загрузить: '))
     res_YA.send_to_disk(res_VK.export_dict)
-    with open('Список загружаемых файлов', 'w') as outfile:
+    with open('List of downloadable files.json', 'w') as outfile:
         json.dump(res_VK.json, outfile)
