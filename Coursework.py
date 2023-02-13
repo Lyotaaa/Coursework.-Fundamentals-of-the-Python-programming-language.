@@ -23,11 +23,11 @@ def time_convert(unix):
 
 class Vkontakte:
     
-    def __init__(self, token, number, version='5.131'): 
+    def __init__(self, token, count, version='5.131'): 
         self.token = token[0]
         self.id = token[1]
+        self.count = int(count)
         self.url = 'https://api.vk.com/method/photos.get'
-        self.number = int(number)
         self.version = version
         self.initial_params = {'access_token': self.token, 'v': self.version}
         self.json, self.export_dict = self.photo_data_collection()
@@ -38,7 +38,7 @@ class Vkontakte:
             'album_id': 'profile',
             'photo_sizes': 1,
             'extended': 1,
-            'count': 1000
+            'count': self.count
         }
         response = requests.get(url=self.url, params={**self.initial_params, **params})
         return response.json()['response']['count'], response.json()['response']['items']
@@ -56,8 +56,8 @@ class Vkontakte:
         data_collection = {}
         json_file = []
         number_photos, photo_elements = self.get_information_about_the_photo()
-        if self.number <= number_photos:
-            for i in range(self.number):
+        if self.count <= number_photos:
+            for i in range(self.count):
                 photo_address, photo_size = self.find_max_resolution(photo_elements[i]['sizes'])
                 file_name = f'{photo_elements[i]["likes"]["count"]}.jpeg'
                 date = f'{time_convert(photo_elements[i]["date"])}'
