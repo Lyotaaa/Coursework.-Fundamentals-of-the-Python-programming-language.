@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 import datetime
 import json
@@ -22,13 +23,14 @@ def time_convert(unix):
 
 class Vkontakte:
     
-    def __init__(self, token, version='5.131'):
+    def __init__(self, token, number, version='5.131'): 
         self.token = token[0]
         self.id = token[1]
         self.url = 'https://api.vk.com/method/photos.get'
+        self.number = int(number)
         self.version = version
         self.initial_params = {'access_token': self.token, 'v': self.version}
-        self.json, self.export_dict, self.number_photos = self.photo_data_collection()
+        self.json, self.export_dict = self.photo_data_collection()
 
     def get_information_about_the_photo(self):
         params = {
@@ -53,24 +55,28 @@ class Vkontakte:
         data_collection = {}
         json_file = []
         number_photos, photo_elements = self.get_information_about_the_photo()
-        for i in range(number_photos):
-            photo_address, photo_size = self.find_max_resolution(photo_elements[i]['sizes'])
-            file_name = f'{photo_elements[i]["likes"]["count"]}.jpeg'
-            date = f'{time_convert(photo_elements[i]["date"])}'
-            if file_name not in data_collection:
-                data_collection[file_name] = photo_address
-                json_file.append({"file_name": file_name, "size": photo_size})
-            elif file_name in data_collection:
-                data_collection[f'{photo_elements[i]["likes"]["count"]}_{date}.jpeg'] = photo_address
-                json_file.append(({"file_name": f'{photo_elements[i]["likes"]["count"]}_{date}.jpeg',
-                                   "size": photo_size}))
-        return json_file, data_collection, number_photos
+        if self.number <= number_photos:
+            for i in range(self.number):
+                photo_address, photo_size = self.find_max_resolution(photo_elements[i]['sizes'])
+                file_name = f'{photo_elements[i]["likes"]["count"]}.jpeg'
+                date = f'{time_convert(photo_elements[i]["date"])}'
+                if file_name not in data_collection:
+                    data_collection[file_name] = photo_address
+                    json_file.append({"file_name": file_name, "size": photo_size})
+                elif file_name in data_collection:
+                    data_collection[f'{photo_elements[i]["likes"]["count"]}_{date}.jpeg'] = photo_address
+                    json_file.append(({"file_name": f'{photo_elements[i]["likes"]["count"]}_{date}.jpeg',
+                                    "size": photo_size}))
+            return json_file, data_collection
+        else:
+            print(f'Ведённое кол-во фотографий нет. Всего фотографий в профиле {number_photos}. Повторите запрос.')
+            sys.exit()
+        
 
 class YandexDisk:
     
-    def __init__(self, folder_name, token, number):
+    def __init__(self, folder_name, token):
         self.token = token[2]
-        self.number_of_photos = int(number)
         self.url_upload = "https://cloud-api.yandex.net/v1/disk/resources/upload"
         self.url_resources = "https://cloud-api.yandex.net/v1/disk/resources"
         self.headers = {'Authorization': self.token}
@@ -99,9 +105,8 @@ class YandexDisk:
         files_in_folder = self.get_information_about_folder(self.folder)
         print(f'Количество файлов для загрузки: {len(data_collection)}.')
         for key in tqdm(data_collection.keys()):
-        # for key, i in zip(data_collection.keys(), tqdm(range(self.number_of_photos))):
-            time.sleep(0.75)
-            if counter <= self.number_of_photos:
+            time.sleep(0.5)
+            if counter < len(data_collection):
                 if key not in files_in_folder:
                     params = {
                         'path': f'{self.folder}/{key}',
@@ -118,8 +123,10 @@ class YandexDisk:
         print(f'Загрузка завершена. Файлов загружено: {counter}.')
 
 if __name__ == '__main__':
-    res_VK = Vkontakte(open_a_token('confing.ini'))
-    res_YA = YandexDisk('1АААААА', open_a_token('confing.ini'), input('Введите кол-во фотографий, которые хотите загрузить: '))
+    
+    res_VK = Vkontakte(open_a_token('confing.ini'), input('Введите кол-во фотографий, которые хотите загрузить: '))
+    # pprint(res_VK.json)
+    res_YA = YandexDisk('!Test', open_a_token('confing.ini'))
     res_YA.send_to_disk(res_VK.export_dict)
     with open('List of downloadable files.json', 'w') as outfile:
         json.dump(res_VK.json, outfile)
