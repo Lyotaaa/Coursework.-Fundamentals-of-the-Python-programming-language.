@@ -37,7 +37,8 @@ class Vkontakte:
             'owner_id': self.id,
             'album_id': 'profile',
             'photo_sizes': 1,
-            'extended': 1
+            'extended': 1,
+            'count': 1000
         }
         response = requests.get(url=self.url, params={**self.initial_params, **params})
         return response.json()['response']['count'], response.json()['response']['items']
